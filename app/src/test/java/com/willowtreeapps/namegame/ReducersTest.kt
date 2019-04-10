@@ -2,7 +2,11 @@ package com.willowtreeapps.namegame
 
 import com.willowtreeapps.common.*
 import com.willowtreeapps.common.boundary.displayName
+import com.willowtreeapps.common.boundary.toQuestionViewState
+import com.willowtreeapps.common.middleware.Cmd2
 import com.willowtreeapps.common.repo.MockRepositoryFactory
+import com.willowtreeapps.common.ui.QuestionPresenter
+import com.willowtreeapps.common.ui.QuestionView
 import org.junit.Assert.*
 import org.junit.Test
 import java.lang.Exception
@@ -89,6 +93,26 @@ class ReducersTest {
     }
 
     @Test
+    fun `CORRECT answer should animate the view`() {
+        val initial = generateInitialTestState()
+
+        val answer = initial.currentQuestionProfile().displayName()
+        val final = reducer(initial, Actions.NamePickedAction(answer))
+
+        assertEquals(Cmd2.run(PresenterFactory::questPresenter, QuestionPresenter::view, QuestionView::showCorrectAnswer, final.toQuestionViewState(), final.isGameComplete()), final.viewCmd)
+    }
+
+    @Test
+    fun `INCORRECT answer should animate the incorrect Answer`() {
+        val initial = generateInitialTestState()
+
+        val answer = "Wrong!!"
+        val final = reducer(initial, Actions.NamePickedAction(answer))
+
+        assertEquals(Cmd2.run(PresenterFactory::questPresenter, QuestionPresenter::view, QuestionView::showWrongAnswer, final.toQuestionViewState(), final.isGameComplete()), final.viewCmd)
+    }
+
+    @Test
     fun `mark current round as INCORRECT when name doesn't matches`() {
         val initial = generateInitialTestState()
         val answer = "wrong answer"
@@ -134,6 +158,7 @@ class ReducersTest {
         assertEquals(10, final.settings.numQuestions)
 
     }
+
 
     private fun generateInitialTestState(): AppState {
         val initialState = reducer(AppState(), Actions.FetchingProfilesSuccessAction(MockRepositoryFactory.getValidResponse()))

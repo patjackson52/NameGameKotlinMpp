@@ -18,6 +18,12 @@ fun AppState.toQuestionViewState(): QuestionViewState {
     if (selectedBtnNum != null) {
         selectedBtnNum += 1
     }
+    var lastSelectBtnNum = -1
+    if (currentQuestionIndex > 0) {
+
+        val lastProfile = getProfile(questions[currentQuestionIndex - 1].profileId)
+        lastSelectBtnNum = questions[currentQuestionIndex - 1]?.choices?.indexOfFirst { it.id == lastProfile?.id }
+    }
     return QuestionViewState(title = "Who is this?",
             profileImageUrl = "https:$imageUrl",
             currentQuestion = (currentQuestionIndex + 1).toString(),
@@ -28,6 +34,7 @@ fun AppState.toQuestionViewState(): QuestionViewState {
             button4Text = choice4,
             correctBtnNum = correctBtnNum,
             timerText = timerText,
+            lastCorrectBtnNum = lastSelectBtnNum,
             selectedBtnNum =  selectedBtnNum ?: -1)
 }
 

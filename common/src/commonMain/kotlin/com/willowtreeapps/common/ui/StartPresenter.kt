@@ -6,6 +6,9 @@ import com.willowtreeapps.common.Actions
 import com.willowtreeapps.common.AppState
 import com.willowtreeapps.common.NetworkThunks
 import com.willowtreeapps.common.Presenter
+import com.willowtreeapps.common.middleware.Screen
+import kotlinx.serialization.json.Json
+import kotlinx.serialization.stringify
 
 
 class StartPresenter(val store: Store<AppState>,
@@ -23,6 +26,7 @@ class StartPresenter(val store: Store<AppState>,
         withSingleField({ it.errorLoadingProfiles }) {
             view?.showError(state.errorMsg)
         }
+
     }
 
     fun startGame() {
@@ -31,6 +35,6 @@ class StartPresenter(val store: Store<AppState>,
     }
 
     fun settingsTapped() {
-        store.dispatch(Actions.SettingsTappedAction())
+        store.dispatch(Actions.Navigate(Screen.SETTINGS))
     }
 }

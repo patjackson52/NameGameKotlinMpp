@@ -6,6 +6,7 @@ import com.willowtreeapps.common.Actions
 import com.willowtreeapps.common.AppState
 import com.willowtreeapps.common.Presenter
 import com.willowtreeapps.common.boundary.toGameResultsViewState
+import com.willowtreeapps.common.middleware.Screen
 
 class GameResultsPresenter(val store: Store<AppState>) : Presenter<GameResultsView>() {
     override fun makeSubscriber() = SelectorSubscriberFn(store) {
@@ -14,6 +15,8 @@ class GameResultsPresenter(val store: Store<AppState>) : Presenter<GameResultsVi
 
     fun startOverTapped() {
         store.dispatch(Actions.StartOverAction())
+        store.dispatch(Actions.SaveGameState())
+        store.dispatch(Actions.Navigate(Screen.START))
     }
 
     fun onBackPressed() {

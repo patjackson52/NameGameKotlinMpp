@@ -1,9 +1,9 @@
 package com.willowtreeapps.common
 
 import com.beyondeye.reduks.*
+import com.willowtreeapps.common.middleware.Cmd2
 import com.willowtreeapps.common.ui.*
 import kotlin.coroutines.CoroutineContext
-import kotlin.reflect.KClass
 
 /**
  * PresenterFactory that creates presenters for all views in the application.
@@ -11,17 +11,17 @@ import kotlin.reflect.KClass
  * Attaching returns a presenter to the view.
  * PresenterFactory subscribes to changes in state, and passes state to presenters.
  */
-internal class PresenterFactory(private val gameEngine: GameEngine, networkContext: CoroutineContext) : StoreSubscriber<AppState> {
+class PresenterFactory(private val gameEngine: GameEngine, networkContext: CoroutineContext) : StoreSubscriber<AppState> {
 
     private val timerThunks = TimerThunks(networkContext, gameEngine.appStore)
     private val networkThunks = NetworkThunks(networkContext, gameEngine.appStore, timerThunks)
     //    private val presenters = mutableSetOf<Presenter>()
     private var subscription: StoreSubscription? = null
 
-    private val startPresenter by lazy { StartPresenter(gameEngine.appStore, networkThunks) }
-    private val questPresenter by lazy { QuestionPresenter(gameEngine.appStore, gameEngine.vibrateUtil, timerThunks) }
-    private val gameResultsPresenter by lazy { GameResultsPresenter(gameEngine.appStore) }
-    private val settingsPresenter by lazy { SettingsPresenter(gameEngine.appStore) }
+    val startPresenter by lazy { StartPresenter(gameEngine.appStore, networkThunks) }
+    val questPresenter by lazy { QuestionPresenter(gameEngine.appStore, gameEngine.vibrateUtil, timerThunks) }
+    val gameResultsPresenter by lazy { GameResultsPresenter(gameEngine.appStore) }
+    val settingsPresenter by lazy { SettingsPresenter(gameEngine.appStore) }
 
     fun <T : View> attachView(view: T): Presenter<out View?> {
         Logger.d("AttachView: $view")
@@ -63,26 +63,33 @@ internal class PresenterFactory(private val gameEngine: GameEngine, networkConte
         if (view is SettingsView)
             settingsPresenter.detachView(view)
 
-        if (hasAttachedViews()) {
+        if (!hasAttachedViews()) {
             subscription?.unsubscribe()
             subscription = null
         }
     }
 
-    private fun hasAttachedViews() = !startPresenter.isAttached() && !questPresenter.isAttached() && !gameResultsPresenter.isAttached()
+    private fun hasAttachedViews() = startPresenter.isAttached() || !questPresenter.isAttached() || !gameResultsPresenter.isAttached()
 
     override fun onStateChange() {
-        if (startPresenter.isAttached()) {
-            startPresenter.onStateChange(gameEngine.appStore.state)
-        }
-        if (questPresenter.isAttached()) {
-            questPresenter.onStateChange(gameEngine.appStore.state)
-        }
-        if (gameResultsPresenter.isAttached()) {
-            gameResultsPresenter.onStateChange(gameEngine.appStore.state)
-        }
-        if (settingsPresenter.isAttached()) {
-            gameResultsPresenter.onStateChange(gameEngine.appStore.state)
+        if (gameEngine.appStore.state.viewCmd != Cmd2.noOp && hasAttachedViews()) {
+            Logger.d("VIEW CMD: ${gameEngine.appStore.state.viewCmd}")
+            gameEngine.appStore.state.viewCmd.execute(this)
+            gameEngine.appStore.state.viewCmd = Cmd2.noOp
+        } else {
+            Logger.d("STATE CHANGE: ${gameEngine.appStore.state}")
+            if (startPresenter.isAttached()) {
+                startPresenter.onStateChange(gameEngine.appStore.state)
+            }
+            if (questPresenter.isAttached()) {
+                questPresenter.onStateChange(gameEngine.appStore.state)
+            }
+            if (gameResultsPresenter.isAttached()) {
+                gameResultsPresenter.onStateChange(gameEngine.appStore.state)
+            }
+            if (settingsPresenter.isAttached()) {
+                gameResultsPresenter.onStateChange(gameEngine.appStore.state)
+            }
         }
 //        presenters.forEach { it.onStateChange(gameEngine.appStore.state) }
     }
@@ -92,7 +99,7 @@ interface View
 
 abstract class Presenter<T : View?> {
     var view: T? = null
-    var subscriber: StoreSubscriber<AppState>? = null
+    private var subscriber: StoreSubscriber<AppState>? = null
 
     fun isAttached() = view != null
 

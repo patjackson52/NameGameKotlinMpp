@@ -3,16 +3,18 @@ package com.willowtreeapps.common.ui
 import com.beyondeye.reduks.*
 import com.willowtreeapps.common.*
 import com.willowtreeapps.common.boundary.toQuestionViewState
+import com.willowtreeapps.common.middleware.Screen
 import com.willowtreeapps.common.util.VibrateUtil
 
 
 class QuestionPresenter(
         val store: Store<AppState>,
         private val vibrateUtil: VibrateUtil,
-        private val timerThunks: TimerThunks) : Presenter<QuestionView?>() {
+        private val timerThunks: TimerThunks) : Presenter<QuestionView>() {
+
 
     override fun makeSubscriber() = SelectorSubscriberFn(store) {
-        withSingleField({ it.questionClock }, { view?.setTimerText(state.toQuestionViewState()) })
+
         withSingleField({
             it.currentQuestion?.profileId?.id ?: Any()
         }, { view?.showProfile(state.toQuestionViewState()) })
@@ -29,7 +31,7 @@ class QuestionPresenter(
                     }
                     Question.Status.TIMES_UP -> {
                         vibrateUtil.vibrate()
-                        view?.showTimesUp(state.toQuestionViewState(), state.isGameComplete())
+//                        view?.showTimesUpAnimation(state.toQuestionViewState(), state.isGameComplete())
                     }
                     Question.Status.UNANSWERED -> throw IllegalStateException("Question status cannot be Unanswered when waiting for next round == true")
                 }
@@ -40,23 +42,29 @@ class QuestionPresenter(
     fun namePicked(name: String) {
         store.dispatch(Actions.NamePickedAction(name))
         store.dispatch(timerThunks.stopTimer())
+        store.dispatch(Actions.SaveGameState())
     }
 
     fun nextTapped() {
         store.dispatch(Actions.NextQuestionAction())
     }
 
-    fun profileImageIsVisible() {
-        store.dispatch(timerThunks.startCountDownTimer(5))
+    fun onProfileImageVisible() {
+        if (!store.state.hasAnsweredCurrentQuestion) {
+            store.dispatch(timerThunks.startCountDownTimer(5))
+        }
     }
 
     fun endGameTapped() {
         store.dispatch(Actions.GameCompleteAction())
+        store.dispatch(Actions.Navigate(Screen.GAME_COMPLETE))
+        store.dispatch(Actions.SaveGameState())
     }
 
     fun onBackPressed() {
         store.dispatch(Actions.StartOverAction())
         store.dispatch(timerThunks.stopTimer())
+        store.dispatch(Actions.SaveGameState())
     }
 
 }

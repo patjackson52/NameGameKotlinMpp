@@ -4,15 +4,12 @@ import com.beyondeye.reduks.Store
 import com.willowtreeapps.common.Actions
 import com.willowtreeapps.common.AppState
 
-class NavigationMiddleware(val navigator: Navigator) {
+class NavigationMiddleware(private val navigator: Navigator) {
 
     fun dispatch(store: Store<AppState>, nextDispatcher: (Any) -> Any, action: Any): Any {
         val result = nextDispatcher(action)
         when (action) {
-            is Actions.FetchingProfilesSuccessAction -> navigator.goto(Screen.QUESTION)
-            is Actions.GameCompleteAction -> navigator.goto(Screen.GAME_COMPLETE)
-            is Actions.StartOverAction -> navigator.goto(Screen.START)
-            is Actions.SettingsTappedAction -> navigator.goto(Screen.SETTINGS)
+            is Actions.Navigate -> navigator.goto(action.screen)
         }
         return result
     }

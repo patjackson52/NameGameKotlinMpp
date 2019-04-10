@@ -53,10 +53,17 @@ class SelectorSubscriberBuilder<S : Any>(val store: Store<S>) {
     }
 
     val selectorList = mutableMapOf<Selector<S, Any>, (Any) -> Unit>()
+    var ignoreOthersSelector: Pair<Selector<S, Any>, (Any) -> Unit>? = null
+
     fun withSingleField(selector: (S) -> Any, action: (Any) -> Unit) {
         val selBuilder = SelectorBuilder<S>()
         val sel = selBuilder.withSingleField(selector)
         selectorList.put(sel, action)
+    }
+    fun withSingleFieldIgnoreOthers(selector: (S) -> Any, action: (Any) -> Unit) {
+        val selBuilder = SelectorBuilder<S>()
+        val sel = selBuilder.withSingleField(selector)
+        ignoreOthersSelector = Pair(sel, action)
     }
 }
 

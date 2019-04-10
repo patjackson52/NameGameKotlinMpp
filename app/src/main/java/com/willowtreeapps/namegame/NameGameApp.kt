@@ -2,17 +2,23 @@ package com.willowtreeapps.namegame
 
 import android.app.Application
 import com.willowtreeapps.common.GameEngine
+import com.willowtreeapps.common.middleware.Navigator
 import kotlinx.coroutines.Dispatchers
 
 class NameGameApp : Application() {
 
-    lateinit var gameEngine: GameEngine
+    private lateinit var navigator: AndroidNavigator
+
+    val gameEngine by lazy {
+        val engine = GameEngine(navigator, this, Dispatchers.IO, Dispatchers.Main)
+        engine.start()
+        engine
+    }
 
     override fun onCreate() {
         super.onCreate()
         instance = this
-        val navigator = AndroidNavigator()
-        gameEngine = GameEngine(navigator, this, Dispatchers.IO, Dispatchers.Main)
+        navigator = AndroidNavigator()
 
         registerActivityLifecycleCallbacks(navigator)
     }

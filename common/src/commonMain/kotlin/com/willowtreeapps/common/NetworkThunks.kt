@@ -1,6 +1,7 @@
 package com.willowtreeapps.common
 
 import com.beyondeye.reduks.*
+import com.willowtreeapps.common.middleware.Screen
 import com.willowtreeapps.common.repo.KtorProfilesRepository
 import kotlinx.coroutines.*
 import kotlin.coroutines.CoroutineContext
@@ -26,6 +27,8 @@ class NetworkThunks(private val networkContext: CoroutineContext,
             if (result.isSuccessful) {
                 Logger.d("Success")
                 store.dispatch(Actions.FetchingProfilesSuccessAction(result.response!!))
+                store.dispatch(Actions.Navigate(Screen.QUESTION))
+                store.dispatch(Actions.SaveGameState())
             } else {
                 Logger.d("Failure")
                 store.dispatch(Actions.FetchingProfilesFailedAction(result.message!!))

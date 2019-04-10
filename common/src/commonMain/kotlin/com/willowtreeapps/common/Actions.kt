@@ -1,6 +1,7 @@
 package com.willowtreeapps.common
 
 import com.beyondeye.reduks.Action
+import com.willowtreeapps.common.middleware.Screen
 import com.willowtreeapps.common.repo.Profile
 
 sealed class Actions : Action {
@@ -23,9 +24,14 @@ sealed class Actions : Action {
     class TimesUpAction
 
 
-    class SettingsTappedAction
     class LoadAllSettingsAction
     class ChangeNumQuestionsSettingsAction(val num: Int)
+
+    class LoadSavedGameState
+    class GameStateLoaded(val savedState: AppState)
+    class SaveGameState
+
+    class Navigate(val screen: Screen)
 
 }
 
