@@ -1,6 +1,5 @@
 package com.willowtreeapps.common.middleware
 
-import com.willowtreeapps.common.AppState
 import com.willowtreeapps.common.Logger
 import org.reduxkotlin.*
 

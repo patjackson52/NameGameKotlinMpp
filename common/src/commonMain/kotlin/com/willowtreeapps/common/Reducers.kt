@@ -10,7 +10,7 @@ import org.reduxkotlin.castingReducer
  * Reducers and functions used by reducers are in this file.  Functions must be pure functions without
  * side effects.
  */
-val reducer= castingReducer { state: AppState, action ->
+val reducer = castingReducer { state: AppState, action ->
     when (action) {
         is ActionTypes.INIT -> {
             AppState.INITIAL_STATE
@@ -82,4 +82,3 @@ val reducer= castingReducer { state: AppState, action ->
         }
     }
 }
-

@@ -1,6 +1,8 @@
 package com.willowtreeapps.common
 
 import kotlinx.coroutines.*
+import org.reduxkotlin.Dispatcher
+import org.reduxkotlin.GetState
 import org.reduxkotlin.Thunk
 import kotlin.coroutines.CoroutineContext
 
@@ -35,6 +37,7 @@ class TimerThunks(private val backgroundContext: CoroutineContext) : CoroutineSc
             }
         }
     }
+
 
     fun stopTimer(): Thunk = { dispatch, _, _ ->
         countDownTimerJob?.cancel()
